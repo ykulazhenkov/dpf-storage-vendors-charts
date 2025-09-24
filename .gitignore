@@ -1,0 +1,49 @@
+# Local tools and build directories
+bin/
+output/
+
+# Temporary files
+*.tmp
+*.log
+
+# Go related files (if any Go code is added)
+vendor/
+*.test
+*.out
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git related
+*.orig
+
+# Documentation build artifacts
+docs/_build/
+docs/.doctrees/
+
+# CI/CD artifacts
+.github/workflows/artifacts/
+
+# Development and testing
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Backup files
+*.bak
+*.backup

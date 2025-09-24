@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      # Chart-specific versioning tags: chart-name/version
+      # Matches: spdk-csi-controller/v1.0.0, nfs-csi-controller/v0.1.0, etc.
+      # Legacy tags (without chart name) are not supported
+      - '*/v[0-9]+.[0-9]+.[0-9]+*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract tag and set environment variables
+        id: version
+        run: |
+          # Convert repository owner to lowercase to handle uppercase characters
+          REPOSITORY=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          
+          echo "REGISTRY=ghcr.io/${REPOSITORY}" >> $GITHUB_ENV
+          TAG_FULL=${GITHUB_REF#refs/tags/}
+          
+          # Extract chart name and version from tag (format: chart-name/version)
+          CHART_NAME=$(echo "$TAG_FULL" | cut -d'/' -f1)
+          CHART_VERSION=$(echo "$TAG_FULL" | cut -d'/' -f2)
+          echo "CHART_NAME=${CHART_NAME}" >> $GITHUB_ENV
+          echo "TAG=${CHART_VERSION}" >> $GITHUB_ENV
+          echo "Chart release: $CHART_NAME version $CHART_VERSION"
+
+      - name: Validate chart exists
+        run: |
+          if [ ! -d "charts/${{ env.CHART_NAME }}" ]; then
+            echo "Error: Chart '${{ env.CHART_NAME }}' does not exist"
+            exit 1
+          fi
+
+      - name: Run lint
+        run: make lint-${{ env.CHART_NAME }}
+
+      - name: Package and push Helm chart
+        run: make helm-push-${{ env.CHART_NAME }}
