@@ -1,0 +1,6 @@
+apiVersion: v2
+name: nfs-csi-controller
+description: A Helm chart for NFS CSI controller
+type: application
+version: 0.0.1
+appVersion: "0.0.1"
